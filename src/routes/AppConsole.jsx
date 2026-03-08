@@ -1152,14 +1152,11 @@ if (sseRes && sseRes.status === 429) {
             const raw = (ev?.transcript || ev?.text || ev?.result?.transcript || '').toString();
             // persist final transcript (audit)
             queueRealtimeEvent({ event_type: 'transcript.final', role: 'user', content: raw, is_final: true });
+            // UI FIX: do not push realtime user transcripts into the main chat timeline.
+            // They are persisted for audit/export, but hidden from the visible conversation
+            // to avoid flooding the chat and pushing the input box upward during realtime use.
             try {
-              const mid = `rtc_user_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-              setMessages((prev) => prev.concat([{
-                id: mid,
-                role: "user",
-                content: raw,
-                created_at: Math.floor(Date.now()/1000),
-              }]));
+              // intentionally no setMessages() here
             } catch {}
 
             rtcLastFinalTranscriptRef.current = raw;
