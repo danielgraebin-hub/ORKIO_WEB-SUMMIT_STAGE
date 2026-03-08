@@ -125,6 +125,15 @@ function formatDateTime(ts) {
   }
 }
 
+
+function resolveRealtimeTranscriptionLanguage(languageProfile) {
+  const raw = (languageProfile || "").trim();
+  if (!raw) return "";
+  if (raw.toLowerCase() === "auto") return "";
+  if (raw === "pt-BR") return "pt";
+  return raw;
+}
+
 export default function AppConsole() {
   const nav = useNavigate();
 
@@ -1115,8 +1124,7 @@ if (sseRes && sseRes.status === 429) {
         try {
           const envLang = (window.__ORKIO_ENV__?.VITE_REALTIME_TRANSCRIBE_LANGUAGE || import.meta.env.VITE_REALTIME_TRANSCRIBE_LANGUAGE || "").trim();
           const preferredLang = summitRuntimeModeRef.current === "summit" ? (summitLanguageProfileRef.current || envLang || "") : envLang;
-          const rawLangHint = (preferredLang || "").trim();
-          const langHint = rawLangHint.toLowerCase() === "auto" ? "" : rawLangHint;
+          const langHint = resolveRealtimeTranscriptionLanguage(preferredLang);
           const transcription = { model: "gpt-4o-mini-transcribe" };
           if (langHint) transcription.language = langHint;
           dc.send(JSON.stringify({
